@@ -1,0 +1,164 @@
+name: Build Android APK & AAB
+
+on:
+  push:
+    branches: [ main, master ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build type (debug/release)'
+        required: true
+        default: 'release'
+        type: choice
+        options:
+          - release
+          - debug
+
+jobs:
+  build-android:
+    name: Build Android App
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Decode Keystore
+        if: github.event_name != 'pull_request'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          mkdir -p app/keystore
+          echo "$KEYSTORE_BASE64" | base64 --decode > app/keystore/mycollegeai.keystore
+          echo "✅ Keystore decoded successfully"
+
+      - name: Build Debug APK
+        if: github.event.inputs.build_type == 'debug' || github.event_name == 'pull_request'
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Build Release APK
+        if: github.event_name != 'pull_request' && (github.event.inputs.build_type == 'release' || github.event_name == 'push')
+        env:
+          KEYSTORE_PATH: keystore/mycollegeai.keystore
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew assembleRelease --stacktrace
+
+      - name: Build Release AAB (for Google Play)
+        if: github.event_name != 'pull_request' && (github.event.inputs.build_type == 'release' || github.event_name == 'push')
+        env:
+          KEYSTORE_PATH: keystore/mycollegeai.keystore
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew bundleRelease --stacktrace
+
+      - name: Get version info
+        id: version
+        run: |
+          VERSION_NAME=$(grep "versionName" app/build.gradle | head -1 | awk -F'"' '{print $2}')
+          VERSION_CODE=$(grep "versionCode" app/build.gradle | head -1 | awk '{print $2}')
+          echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
+          echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
+          echo "📦 Version: $VERSION_NAME ($VERSION_CODE)"
+
+      - name: Upload Debug APK
+        if: github.event_name == 'pull_request' || github.event.inputs.build_type == 'debug'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mycollegeai-debug-${{ steps.version.outputs.version_name }}
+          path: app/build/outputs/apk/debug/*.apk
+          retention-days: 30
+
+      - name: Upload Release APK
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mycollegeai-release-${{ steps.version.outputs.version_name }}
+          path: app/build/outputs/apk/release/*.apk
+          retention-days: 90
+
+      - name: Upload Release AAB (Google Play)
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mycollegeai-aab-${{ steps.version.outputs.version_name }}
+          path: app/build/outputs/bundle/release/*.aab
+          retention-days: 90
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: MY COLLEGE AI v${{ steps.version.outputs.version_name }}
+          body: |
+            ## 🎓 MY COLLEGE AI - منصة تعليمية ذكية
+            
+            ### التغييرات في هذا الإصدار:
+            - تحديثات وتحسينات في الأداء
+            
+            ### ملفات التثبيت:
+            - **APK**: للتثبيت المباشر على الجهاز
+            - **AAB**: لرفعه على Google Play Console
+            
+            ### متطلبات النظام:
+            - Android 7.0 (API 24) أو أحدث
+            - اتصال بالإنترنت مطلوب
+          files: |
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/bundle/release/*.aab
+          draft: false
+          prerelease: false
+
+  # Auto-deploy to Google Play (Internal Testing Track)
+  deploy-to-play:
+    name: Deploy to Google Play (Internal Testing)
+    needs: build-android
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+      - name: Download AAB artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: mycollegeai-aab-*
+          merge-multiple: true
+
+      - name: Upload to Google Play Internal Testing
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.mycollegeai.app
+          releaseFiles: '*.aab'
+          track: internal
+          status: completed
+          inAppUpdatePriority: 2
+          whatsNewDirectory: whatsnew/

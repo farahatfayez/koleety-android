@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Splash screen icon - replace with actual app icon vector -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Background circle -->
+    <path
+        android:fillColor="#6366f1"
+        android:pathData="M54,54m-54,0a54,54 0,1 1,108 0a54,54 0,1 1,-108 0" />
+    <!-- Letter M -->
+    <path
+        android:fillColor="#ffffff"
+        android:pathData="M20,75 L20,35 L35,55 L54,35 L73,55 L88,35 L88,75 L80,75 L80,52 L65,68 L54,52 L43,68 L28,52 L28,75 Z" />
+</vector>

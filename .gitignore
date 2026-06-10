@@ -1,0 +1,23 @@
+# Keystore files - NEVER commit to public repos
+app/keystore/
+*.keystore
+*.jks
+
+# Build outputs
+build/
+app/build/
+.gradle/
+
+# Local properties
+local.properties
+*.properties
+
+# IDE files
+.idea/
+*.iml
+.DS_Store
+
+# Android Studio
+captures/
+.externalNativeBuild/
+.cxx/

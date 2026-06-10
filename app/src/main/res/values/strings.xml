@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MY COLLEGE AI</string>
+    <string name="app_description">منصة تعليمية ذكية لطلاب الجامعات المصرية</string>
+    <string name="shortcut_ai_tutor">المساعد الذكي</string>
+    <string name="shortcut_ai_tutor_desc">تحدث مع المساعد الطبي الذكي</string>
+    <string name="shortcut_lecture">شرح المحاضرات</string>
+    <string name="shortcut_lecture_desc">صوّر مادتك واحنا نشرحهالك</string>
+    <string name="shortcut_quiz">اختبار ذكي</string>
+    <string name="shortcut_quiz_desc">اختبر نفسك بالذكاء الاصطناعي</string>
+</resources>

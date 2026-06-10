@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <shortcut
+        android:shortcutId="ai_tutor"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_ai_tutor"
+        android:shortcutLongLabel="@string/shortcut_ai_tutor_desc">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="https://mycolleg.com/ai-tutor" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="lecture_analyzer"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_lecture"
+        android:shortcutLongLabel="@string/shortcut_lecture_desc">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="https://mycolleg.com/lecture-analyzer" />
+        <categories android:name="android.shortcut.media" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="ai_quiz"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_quiz"
+        android:shortcutLongLabel="@string/shortcut_quiz_desc">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="https://mycolleg.com/ai-quiz" />
+        <categories android:name="android.shortcut.media" />
+    </shortcut>
+
+</shortcuts>
