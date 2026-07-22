@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Base application theme -->
+    <!-- Base application theme - API 35 compliant -->
     <style name="Theme.Koleety" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryVariant">@color/colorPrimaryDark</item>
@@ -9,6 +9,8 @@
         <item name="android:statusBarColor">@color/colorPrimary</item>
         <item name="android:navigationBarColor">@color/colorPrimary</item>
         <item name="android:windowBackground">@color/colorBackground</item>
+        <!-- Edge-to-edge support for API 35 -->
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
     </style>
 
     <!-- Splash screen theme using Android 12 Splash Screen API -->
