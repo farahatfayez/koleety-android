@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Base application theme - API 35 compliant -->
+    <!-- Base application theme - Android 15 (API 35) compliant -->
     <style name="Theme.Koleety" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryVariant">@color/colorPrimaryDark</item>
@@ -9,16 +9,14 @@
         <item name="android:statusBarColor">@color/colorPrimary</item>
         <item name="android:navigationBarColor">@color/colorPrimary</item>
         <item name="android:windowBackground">@color/colorBackground</item>
-        <!-- Edge-to-edge: use default to avoid crash on some devices -->
-        <item name="android:windowLayoutInDisplayCutoutMode">default</item>
     </style>
 
-    <!-- Splash screen theme using Android 12 Splash Screen API -->
-    <!-- FIXED v1.0.10: Use mipmap icon instead of complex vector drawable to prevent InflateException crash -->
+    <!-- Splash screen theme - Android 12+ Splash Screen API -->
+    <!-- Using ic_launcher (adaptive icon) - safe on all Android versions including 15 -->
     <style name="Theme.Koleety.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/splashBackground</item>
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_round</item>
-        <item name="windowSplashScreenAnimationDuration">200</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="windowSplashScreenAnimationDuration">300</item>
         <item name="postSplashScreenTheme">@style/Theme.Koleety</item>
     </style>
 </resources>

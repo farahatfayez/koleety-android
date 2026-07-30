@@ -8,6 +8,7 @@
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
@@ -60,26 +61,22 @@
             <meta-data
                 android:name="android.support.customtabs.trusted.NAVIGATION_BAR_DIVIDER_COLOR"
                 android:resource="@color/colorPrimary" />
-            <!-- FIXED v1.0.10: Use simple mipmap icon instead of complex vector drawable -->
+            <!-- Splash icon: use adaptive ic_launcher (safe on all Android versions including 15) -->
             <meta-data
                 android:name="android.support.customtabs.trusted.SPLASH_IMAGE_DRAWABLE"
-                android:resource="@mipmap/ic_launcher_round" />
+                android:resource="@mipmap/ic_launcher" />
             <meta-data
                 android:name="android.support.customtabs.trusted.SPLASH_SCREEN_BACKGROUND_COLOR"
                 android:resource="@color/colorPrimary" />
             <meta-data
                 android:name="android.support.customtabs.trusted.SPLASH_SCREEN_FADE_OUT_DURATION"
-                android:value="200" />
+                android:value="300" />
             <meta-data
                 android:name="android.support.customtabs.trusted.FILE_PROVIDER_AUTHORITY"
                 android:value="com.koleety.app.fileprovider" />
             <meta-data
                 android:name="android.support.customtabs.trusted.HANDLES_INTERNAL_LINKS"
                 android:value="true" />
-            <!-- FIXED v1.0.10: Use webview fallback instead of customtabs to prevent crash when Chrome is outdated -->
-            <meta-data
-                android:name="android.support.customtabs.trusted.FALLBACK_STRATEGY"
-                android:value="webview" />
         </activity>
 
         <!-- App Shortcuts -->
