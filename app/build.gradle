@@ -11,8 +11,8 @@ android {
         applicationId "com.koleety.app"
         minSdk 24
         targetSdk 35
-        versionCode 10
-        versionName "1.0.9"
+        versionCode 11
+        versionName "1.0.10"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -69,4 +69,7 @@ dependencies {
 
     // Activity - needed for edge-to-edge API 35
     implementation 'androidx.activity:activity-ktx:1.9.0'
+
+    // WebView - needed for webview fallback strategy (v1.0.10 fix)
+    implementation 'androidx.webkit:webkit:1.11.0'
 }

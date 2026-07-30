@@ -27,7 +27,7 @@
             android:name="com.google.androidbrowserhelper.trusted.LauncherActivity"
             android:exported="true"
             android:theme="@style/Theme.Koleety.Splash"
-            android:configChanges="orientation|screenSize|keyboardHidden">
+            android:configChanges="orientation|screenSize|keyboardHidden|screenLayout">
 
             <!-- Main launcher intent -->
             <intent-filter>
@@ -60,24 +60,26 @@
             <meta-data
                 android:name="android.support.customtabs.trusted.NAVIGATION_BAR_DIVIDER_COLOR"
                 android:resource="@color/colorPrimary" />
+            <!-- FIXED v1.0.10: Use simple mipmap icon instead of complex vector drawable -->
             <meta-data
                 android:name="android.support.customtabs.trusted.SPLASH_IMAGE_DRAWABLE"
-                android:resource="@drawable/splash_icon" />
+                android:resource="@mipmap/ic_launcher_round" />
             <meta-data
                 android:name="android.support.customtabs.trusted.SPLASH_SCREEN_BACKGROUND_COLOR"
                 android:resource="@color/colorPrimary" />
             <meta-data
                 android:name="android.support.customtabs.trusted.SPLASH_SCREEN_FADE_OUT_DURATION"
-                android:value="300" />
+                android:value="200" />
             <meta-data
                 android:name="android.support.customtabs.trusted.FILE_PROVIDER_AUTHORITY"
                 android:value="com.koleety.app.fileprovider" />
             <meta-data
                 android:name="android.support.customtabs.trusted.HANDLES_INTERNAL_LINKS"
                 android:value="true" />
+            <!-- FIXED v1.0.10: Use webview fallback instead of customtabs to prevent crash when Chrome is outdated -->
             <meta-data
                 android:name="android.support.customtabs.trusted.FALLBACK_STRATEGY"
-                android:value="customtabs" />
+                android:value="webview" />
         </activity>
 
         <!-- App Shortcuts -->
