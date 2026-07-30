@@ -11,8 +11,8 @@ android {
         applicationId "com.koleety.app"
         minSdk 24
         targetSdk 35
-        versionCode 14
-        versionName "1.0.13"
+        versionCode 15
+        versionName "1.0.14"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -51,9 +51,16 @@ android {
     }
 }
 
+configurations.all {
+    // Force browser to 1.8.0 to prevent androidbrowserhelper from pulling in
+    // browser:1.9.0-alpha04 which requires compileSdk 36
+    resolutionStrategy {
+        force 'androidx.browser:browser:1.8.0'
+    }
+}
+
 dependencies {
-    // Trusted Web Activity (TWA) - 2.6.2 is the latest version compatible with compileSdk 35
-    // 2.7.x requires compileSdk 36 which needs AGP 8.9+
+    // Trusted Web Activity (TWA) - 2.6.2 with forced browser:1.8.0
     implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.6.2'
 
     // AndroidX Core - compatible with API 35
@@ -65,7 +72,8 @@ dependencies {
     // Splash Screen API (Android 12+) - required for API 35
     implementation 'androidx.core:core-splashscreen:1.0.1'
 
-    // Browser (Chrome Custom Tabs fallback)
+    // Browser (Chrome Custom Tabs fallback) - pinned to 1.8.0 (SDK 35 compatible)
+    // Must match the forced version above to prevent alpha version from being pulled in
     implementation 'androidx.browser:browser:1.8.0'
 
     // Activity - needed for edge-to-edge API 35
