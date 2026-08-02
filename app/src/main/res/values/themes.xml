@@ -1,24 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Base application theme - Android 15 (API 35) fully compliant -->
-    <style name="Theme.Koleety" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryVariant">@color/colorPrimaryDark</item>
-        <item name="colorOnPrimary">@color/colorOnPrimary</item>
-        <item name="colorSecondary">@color/colorAccent</item>
-        <item name="android:statusBarColor">@color/colorPrimary</item>
-        <item name="android:navigationBarColor">@color/colorPrimary</item>
-        <item name="android:windowBackground">@color/colorBackground</item>
-        <!-- Android 15 fix: opt-out of forced edge-to-edge to prevent layout/crash issues -->
-        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
-    </style>
 
-    <!-- Splash screen theme - Android 12+ Splash Screen API -->
-    <!-- Using ic_launcher (adaptive icon) - safe on all Android versions including 15 -->
-    <style name="Theme.Koleety.Splash" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/splashBackground</item>
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
-        <item name="windowSplashScreenAnimationDuration">300</item>
-        <item name="postSplashScreenTheme">@style/Theme.Koleety</item>
+<resources>
+    
+    <!-- Base application theme - Android 15 (API 35) fully compliant -->
+    
+    <style name="Theme.Koleety" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        
+        <item name="colorPrimary">@color/colorPrimary</item>
+        
+        <item name="colorPrimaryVariant">@color/colorPrimaryDark</item>
+        
+        <item name="colorOnPrimary">@color/colorOnPrimary</item>
+        
+        <item name="colorSecondary">@color/colorAccent</item>
+        
+        <item name="android:statusBarColor">@color/colorPrimary</item>
+        
+        <item name="android:navigationBarColor">@color/colorPrimary</item>
+        
+        <item name="android:windowBackground">@color/colorBackground</item>
+        
+        <!-- Android 15: opt-out of forced edge-to-edge enforcement to prevent crashes -->
+        
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
+        
     </style>
+    
+
+    
+    <!-- Splash screen theme - Android 12+ Splash Screen API -->
+    
+    <!-- Using ic_launcher (adaptive icon) - safe on all Android versions including 15 -->
+    
+    <style name="Theme.Koleety.Splash" parent="Theme.SplashScreen">
+        
+        <item name="windowSplashScreenBackground">@color/splashBackground</item>
+        
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        
+        <item name="windowSplashScreenAnimationDuration">300</item>
+        
+        <item name="postSplashScreenTheme">@style/Theme.Koleety</item>
+        
+    </style>
+    
 </resources>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
