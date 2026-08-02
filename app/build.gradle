@@ -11,8 +11,8 @@ android {
         applicationId "com.koleety.app"
         minSdk 24
         targetSdk 35
-        versionCode 15
-        versionName "1.0.14"
+        versionCode 16
+        versionName "1.0.15"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -52,16 +52,17 @@ android {
 }
 
 configurations.all {
-    // Force browser to 1.8.0 to prevent androidbrowserhelper from pulling in
-    // browser:1.9.0-alpha04 which requires compileSdk 36
     resolutionStrategy {
+        // Force browser:1.8.0 - androidbrowserhelper:2.7.2 pulls browser:1.9.0-alpha04
+        // which requires compileSdk 36; we stay on compileSdk 35 per Google requirement.
         force 'androidx.browser:browser:1.8.0'
     }
 }
 
 dependencies {
-    // Trusted Web Activity (TWA) - 2.6.2 with forced browser:1.8.0
-    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.6.2'
+    // Trusted Web Activity (TWA) - 2.7.2 = latest stable with full Android 15 support
+    // Combined with forced browser:1.8.0 to avoid alpha dependency on compileSdk 36
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.7.2'
 
     // AndroidX Core - compatible with API 35
     implementation 'androidx.core:core-ktx:1.15.0'
@@ -73,7 +74,6 @@ dependencies {
     implementation 'androidx.core:core-splashscreen:1.0.1'
 
     // Browser (Chrome Custom Tabs fallback) - pinned to 1.8.0 (SDK 35 compatible)
-    // Must match the forced version above to prevent alpha version from being pulled in
     implementation 'androidx.browser:browser:1.8.0'
 
     // Activity - needed for edge-to-edge API 35
