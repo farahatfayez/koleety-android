@@ -1,21 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Internet access -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Camera for photo capture via browser -->
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="28" />
-    <!-- Android 13+ (API 33+): granular media permissions -->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"
-        android:minSdkVersion="33" />
-    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"
-        android:minSdkVersion="33" />
-    <!-- Android 14+ (API 34+): partial media access -->
-    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED"
-        android:minSdkVersion="34" />
+
+    <!-- Notifications -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
@@ -36,13 +29,11 @@
             android:exported="true"
             android:theme="@style/Theme.Koleety.Splash"
             android:configChanges="orientation|screenSize|keyboardHidden|screenLayout">
-
             <!-- Main launcher intent -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
             <!-- Deep link: koleety.com -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
@@ -52,7 +43,6 @@
                     android:scheme="https"
                     android:host="koleety.com" />
             </intent-filter>
-
             <meta-data
                 android:name="android.support.customtabs.trusted.DEFAULT_URL"
                 android:value="https://koleety.com/" />
@@ -68,7 +58,7 @@
             <meta-data
                 android:name="android.support.customtabs.trusted.NAVIGATION_BAR_DIVIDER_COLOR"
                 android:resource="@color/colorPrimary" />
-            <!-- Splash icon: use adaptive ic_launcher (safe on all Android versions including 15) -->
+            <!-- Splash icon -->
             <meta-data
                 android:name="android.support.customtabs.trusted.SPLASH_IMAGE_DRAWABLE"
                 android:resource="@mipmap/ic_launcher" />
@@ -102,7 +92,7 @@
             </intent-filter>
         </activity-alias>
 
-        <!-- File Provider for camera/file upload -->
+        <!-- File Provider for camera/file upload via browser -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.koleety.app.fileprovider"
@@ -117,6 +107,5 @@
         <meta-data
             android:name="android.app.shortcuts"
             android:resource="@xml/shortcuts" />
-
     </application>
 </manifest>
