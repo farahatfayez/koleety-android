@@ -51,8 +51,15 @@ android {
     }
 }
 
+// Force androidx.browser:1.8.0 to avoid browser:1.9.0-alpha04 which requires compileSdk 36
+configurations.all {
+    resolutionStrategy {
+        force 'androidx.browser:browser:1.8.0'
+    }
+}
+
 dependencies {
-    // androidbrowserhelper:2.6.2 - compatible with compileSdk 35 (no androidx.core:1.17.0 dep)
+    // androidbrowserhelper:2.6.2 - stable release compatible with compileSdk 35
     implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.6.2'
     implementation 'androidx.core:core-ktx:1.13.1'
     implementation 'androidx.appcompat:appcompat:1.7.0'
