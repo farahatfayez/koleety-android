@@ -2,20 +2,17 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
 }
-
 android {
     namespace 'com.koleety.app'
-    compileSdk 35
-
+    compileSdk 36
     defaultConfig {
         applicationId "com.koleety.ai"
         minSdk 24
-        targetSdk 35
-        versionCode 18
-        versionName "1.0.17"
+        targetSdk 36
+        versionCode 19
+        versionName "1.0.18"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-
     signingConfigs {
         release {
             storeFile file(System.getenv("KEYSTORE_PATH") ?: "keystore/koleety.keystore")
@@ -24,7 +21,6 @@ android {
             keyPassword System.getenv("KEY_PASSWORD") ?: "koleety2024"
         }
     }
-
     buildTypes {
         release {
             minifyEnabled true
@@ -36,39 +32,28 @@ android {
             versionNameSuffix "-debug"
         }
     }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
-
     kotlinOptions {
         jvmTarget = '17'
     }
-
     buildFeatures {
         viewBinding true
     }
 }
-
-// Force androidx.browser:1.8.0 to avoid browser:1.9.0-alpha04 which requires compileSdk 36
-configurations.all {
-    resolutionStrategy {
-        force 'androidx.browser:browser:1.8.0'
-    }
-}
-
 dependencies {
-    // androidbrowserhelper:2.6.2 - stable release compatible with compileSdk 35
-    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.6.2'
-    implementation 'androidx.core:core-ktx:1.13.1'
+    // androidbrowserhelper:2.7.2 - now compatible with compileSdk 36
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.7.2'
+    implementation 'androidx.core:core-ktx:1.16.0'
     // core-splashscreen required for Theme.SplashScreen in themes.xml
     implementation 'androidx.core:core-splashscreen:1.0.1'
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'com.google.android.material:material:1.12.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'androidx.activity:activity-ktx:1.9.0'
-    implementation 'androidx.webkit:webkit:1.11.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
+    implementation 'androidx.activity:activity-ktx:1.10.1'
+    implementation 'androidx.webkit:webkit:1.13.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
