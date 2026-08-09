@@ -70,7 +70,7 @@
                 android:value="300" />
             <meta-data
                 android:name="android.support.customtabs.trusted.FILE_PROVIDER_AUTHORITY"
-                android:value="com.koleety.app.fileprovider" />
+                android:value="com.koleety.ai.fileprovider" />
             <meta-data
                 android:name="android.support.customtabs.trusted.HANDLES_INTERNAL_LINKS"
                 android:value="true" />
@@ -95,7 +95,7 @@
         <!-- File Provider for camera/file upload via browser -->
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="com.koleety.app.fileprovider"
+            android:authorities="com.koleety.ai.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
