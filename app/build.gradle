@@ -8,11 +8,11 @@ android {
     compileSdk 35
 
     defaultConfig {
-        applicationId "com.koleety.app"
+        applicationId "com.koleety.ai"
         minSdk 24
         targetSdk 35
-        versionCode 17
-        versionName "1.0.16"
+        versionCode 18
+        versionName "1.0.17"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
