@@ -19,16 +19,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Koleety"
         android:networkSecurityConfig="@xml/network_security_config"
-        android:usesCleartextTraffic="false"
-        android:enableOnBackInvokedCallback="true"
-        android:localeConfig="@xml/locales_config">
+        android:usesCleartextTraffic="false">
 
         <!-- Main TWA Activity -->
         <activity
             android:name="com.google.androidbrowserhelper.trusted.LauncherActivity"
             android:exported="true"
-            android:theme="@style/Theme.Koleety.Splash"
-            android:configChanges="orientation|screenSize|keyboardHidden|screenLayout">
+            android:theme="@style/Theme.Koleety.Splash">
             <!-- Main launcher intent -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -42,6 +39,14 @@
                 <data
                     android:scheme="https"
                     android:host="koleety.com" />
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="www.koleety.com" />
             </intent-filter>
             <meta-data
                 android:name="android.support.customtabs.trusted.DEFAULT_URL"
@@ -61,7 +66,7 @@
             <!-- Splash icon -->
             <meta-data
                 android:name="android.support.customtabs.trusted.SPLASH_IMAGE_DRAWABLE"
-                android:resource="@mipmap/ic_launcher" />
+                android:resource="@drawable/splash_icon" />
             <meta-data
                 android:name="android.support.customtabs.trusted.SPLASH_SCREEN_BACKGROUND_COLOR"
                 android:resource="@color/colorPrimary" />

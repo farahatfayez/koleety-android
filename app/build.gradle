@@ -3,14 +3,14 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 android {
-    namespace 'com.koleety.app'
+    namespace 'com.koleety.ai'
     compileSdk 36
     defaultConfig {
         applicationId "com.koleety.ai"
         minSdk 24
         targetSdk 36
-        versionCode 19
-        versionName "1.0.18"
+        versionCode 20
+        versionName "1.0.19"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     signingConfigs {
@@ -43,18 +43,9 @@ android {
         viewBinding true
     }
 }
-// Force stable browser version to avoid alpha dependencies requiring AGP 8.9+
-configurations.all {
-    resolutionStrategy {
-        force 'androidx.browser:browser:1.8.0'
-        force 'androidx.core:core:1.13.1'
-        force 'androidx.core:core-ktx:1.13.1'
-    }
-}
 dependencies {
-    // androidbrowserhelper:2.6.2 - stable, compatible with compileSdk 36 when browser is forced
-    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.6.2'
-    implementation 'androidx.core:core-ktx:1.13.1'
+    // Current TWA implementation compatible with compileSdk/targetSdk 36.
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.7.2'
     implementation 'androidx.core:core-splashscreen:1.0.1'
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'com.google.android.material:material:1.12.0'
