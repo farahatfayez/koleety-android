@@ -9,7 +9,7 @@
         android:shortcutLongLabel="@string/shortcut_ai_tutor_desc">
         <intent
             android:action="android.intent.action.VIEW"
-            android:data="https://mycolleg.com/ai-tutor" />
+            android:data="https://koleety.com/ai-tutor" />
         <categories android:name="android.shortcut.conversation" />
     </shortcut>
 
@@ -21,7 +21,7 @@
         android:shortcutLongLabel="@string/shortcut_lecture_desc">
         <intent
             android:action="android.intent.action.VIEW"
-            android:data="https://mycolleg.com/lecture-analyzer" />
+            android:data="https://koleety.com/lecture-analyzer" />
         <categories android:name="android.shortcut.media" />
     </shortcut>
 
@@ -33,7 +33,7 @@
         android:shortcutLongLabel="@string/shortcut_quiz_desc">
         <intent
             android:action="android.intent.action.VIEW"
-            android:data="https://mycolleg.com/ai-quiz" />
+            android:data="https://koleety.com/ai-quiz" />
         <categories android:name="android.shortcut.media" />
     </shortcut>
 

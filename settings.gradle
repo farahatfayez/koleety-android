@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "MY COLLEGE AI"
+rootProject.name = "KOLEETY AI"
 include ':app'

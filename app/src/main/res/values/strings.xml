@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">MY COLLEGE AI</string>
+    <string name="app_name">KOLEETY AI</string>
     <string name="app_description">منصة تعليمية ذكية لطلاب الجامعات المصرية</string>
     <string name="shortcut_ai_tutor">المساعد الذكي</string>
     <string name="shortcut_ai_tutor_desc">تحدث مع المساعد الطبي الذكي</string>

@@ -1,10 +1,6 @@
 name: Build Android APK & AAB
 
 on:
-  push:
-    branches: [ main, master ]
-    tags:
-      - 'v*'
   pull_request:
     branches: [ main, master ]
   workflow_dispatch:
@@ -56,7 +52,7 @@ jobs:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: |
           mkdir -p app/keystore
-          echo "$KEYSTORE_BASE64" | base64 --decode > app/keystore/mycollegeai.keystore
+          echo "$KEYSTORE_BASE64" | base64 --decode > app/keystore/koleety.keystore
           echo "✅ Keystore decoded successfully"
 
       - name: Build Debug APK
@@ -66,7 +62,7 @@ jobs:
       - name: Build Release APK
         if: github.event_name != 'pull_request' && (github.event.inputs.build_type == 'release' || github.event_name == 'push')
         env:
-          KEYSTORE_PATH: keystore/mycollegeai.keystore
+          KEYSTORE_PATH: app/keystore/koleety.keystore
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
@@ -75,7 +71,7 @@ jobs:
       - name: Build Release AAB (for Google Play)
         if: github.event_name != 'pull_request' && (github.event.inputs.build_type == 'release' || github.event_name == 'push')
         env:
-          KEYSTORE_PATH: keystore/mycollegeai.keystore
+          KEYSTORE_PATH: app/keystore/koleety.keystore
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
@@ -94,7 +90,7 @@ jobs:
         if: github.event_name == 'pull_request' || github.event.inputs.build_type == 'debug'
         uses: actions/upload-artifact@v4
         with:
-          name: mycollegeai-debug-${{ steps.version.outputs.version_name }}
+          name: koleety-debug-${{ steps.version.outputs.version_name }}
           path: app/build/outputs/apk/debug/*.apk
           retention-days: 30
 
@@ -102,7 +98,7 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
-          name: mycollegeai-release-${{ steps.version.outputs.version_name }}
+          name: koleety-release-${{ steps.version.outputs.version_name }}
           path: app/build/outputs/apk/release/*.apk
           retention-days: 90
 
@@ -110,55 +106,6 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
-          name: mycollegeai-aab-${{ steps.version.outputs.version_name }}
+          name: koleety-aab-${{ steps.version.outputs.version_name }}
           path: app/build/outputs/bundle/release/*.aab
           retention-days: 90
-
-      - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
-        with:
-          name: MY COLLEGE AI v${{ steps.version.outputs.version_name }}
-          body: |
-            ## 🎓 MY COLLEGE AI - منصة تعليمية ذكية
-            
-            ### التغييرات في هذا الإصدار:
-            - تحديثات وتحسينات في الأداء
-            
-            ### ملفات التثبيت:
-            - **APK**: للتثبيت المباشر على الجهاز
-            - **AAB**: لرفعه على Google Play Console
-            
-            ### متطلبات النظام:
-            - Android 7.0 (API 24) أو أحدث
-            - اتصال بالإنترنت مطلوب
-          files: |
-            app/build/outputs/apk/release/*.apk
-            app/build/outputs/bundle/release/*.aab
-          draft: false
-          prerelease: false
-
-  # Auto-deploy to Google Play (Internal Testing Track)
-  deploy-to-play:
-    name: Deploy to Google Play (Internal Testing)
-    needs: build-android
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
-    
-    steps:
-      - name: Download AAB artifact
-        uses: actions/download-artifact@v4
-        with:
-          pattern: mycollegeai-aab-*
-          merge-multiple: true
-
-      - name: Upload to Google Play Internal Testing
-        uses: r0adkll/upload-google-play@v1
-        with:
-          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
-          packageName: com.mycollegeai.app
-          releaseFiles: '*.aab'
-          track: internal
-          status: completed
-          inAppUpdatePriority: 2
-          whatsNewDirectory: whatsnew/

@@ -4,25 +4,28 @@ plugins {
 }
 
 android {
-    namespace 'com.mycollegeai.app'
-    compileSdk 34
+    namespace 'com.koleety.ai'
+    compileSdk 36
 
     defaultConfig {
-        applicationId "com.mycollegeai.app"
+        applicationId "com.koleety.ai"
         minSdk 24
-        targetSdk 34
-        versionCode 1
-        versionName "1.0.0"
+        targetSdk 36
+        versionCode 21
+        versionName "1.0.20"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     signingConfigs {
         release {
-            storeFile file(System.getenv("KEYSTORE_PATH") ?: "keystore/mycollegeai.keystore")
-            storePassword System.getenv("KEYSTORE_PASSWORD") ?: "mycollegeai2024"
-            keyAlias System.getenv("KEY_ALIAS") ?: "mycollegeai"
-            keyPassword System.getenv("KEY_PASSWORD") ?: "mycollegeai2024"
+            def keystorePath = System.getenv("KEYSTORE_PATH")
+            if (keystorePath) {
+                storeFile file(keystorePath)
+                storePassword System.getenv("KEYSTORE_PASSWORD")
+                keyAlias System.getenv("KEY_ALIAS")
+                keyPassword System.getenv("KEY_PASSWORD")
+            }
         }
     }
 

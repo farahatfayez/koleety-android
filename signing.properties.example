@@ -1,0 +1,6 @@
+# Copy this file outside the repository as signing.properties and keep the real values in a secure owner-controlled vault.
+# Never commit a keystore, password, alias, or base64-encoded signing material.
+KEYSTORE_PATH=/absolute/path/to/koleety.keystore
+KEYSTORE_PASSWORD=
+KEY_ALIAS=
+KEY_PASSWORD=
