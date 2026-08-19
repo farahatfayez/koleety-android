@@ -1,29 +1,27 @@
-# KOLEETY AI Android — Safe Rebuild Handover
+# KOLEETY AI Android — Production Release Handover
 
-## Purpose
+## النطاق المثبت
 
-This branch prepares a **test-only rebuild** of the working TWA baseline under the new identity `com.koleety.ai`. It does not publish to Google Play and it does not replace `com.mycollegeai.app`.
+هذه النسخة تُجهّز تطبيق TWA جديداً بالحزمة **`com.koleety.ai.app`**. لا تستبدل ولا تعدّل التطبيق القديم العامل `com.mycollegeai.app`، ولا ترفع أي ملف تلقائياً إلى Google Play.
 
-## Locked scope
+| البند | القيمة المثبتة |
+|---|---|
+| Application ID / namespace | `com.koleety.ai.app` |
+| الاسم الظاهر | KOLEETY AI |
+| الإصدار | `1.0.20` — `versionCode 21` |
+| compile / target SDK | 36 |
+| عنوان TWA الافتراضي | `https://koleety.com/` |
+| نطاقات App Links | `koleety.com` و`www.koleety.com` |
+| Android Browser Helper | `2.5.0` — مثبت لتجنب تغيير سلوك الغلاف دون مرجع للتطبيق القديم |
+| أذونات اختيارية | الكاميرا وصور الجهاز والإشعارات، وتُعلن الكاميرا كميزة غير إلزامية |
 
-The TWA behavior and its dependency version remain the same as the baseline. The permitted changes are limited to:
+## ما تم التحقق منه محلياً
 
-| Area | Value |
-| --- | --- |
-| Application ID / namespace | `com.koleety.ai` |
-| Display name | `KOLEETY AI` |
-| Default and deep-link domain | `koleety.com` and `www.koleety.com` |
-| Target / compile SDK | 36 |
-| Candidate version | `1.0.20` (`versionCode 21`) |
-| Launcher assets | Existing KOLEETY icon assets only |
+تم بناء ملف AAB موقّع محلياً باستخدام JDK 17 وAndroid SDK 36، ونجح Android Lint بعد تفعيل تحقق App Links لاختصار المساعد. ملف البناء محمي بـ ProGuard ويحتوي على توقيع upload key مستقل عن أي تطبيق سابق.
 
-## Verified local result
+## سياسة المفاتيح والتوقيع
 
-`./gradlew assembleDebug` completed successfully with JDK 17 and Android SDK 36. The resulting debug APK identifies itself as `com.koleety.ai.debug`, targets SDK 36, and has the app label KOLEETY AI. A debug APK is not a Google Play release artifact.
-
-## Signing policy
-
-The signing key is intentionally **not** stored in the repository or build fallback values. Keep the keystore and all credentials in an owner-controlled secure vault. For a local signed release, supply all four environment variables:
+الـ upload key للحزمة الجديدة محفوظ خارج المستودع ولا يُضاف إلى Git أو إلى مخرجات GitHub Actions. التوقيع يستخدم متغيرات البيئة التالية في وقت البناء فقط:
 
 ```text
 KEYSTORE_PATH
@@ -32,15 +30,24 @@ KEY_ALIAS
 KEY_PASSWORD
 ```
 
-The GitHub workflow expects the corresponding repository secrets, including the base64-encoded keystore. It may build artifacts only when manually dispatched. It does not upload to Google Play and does not create a public GitHub release.
+Google Play App Signing هو من يوقّع APK الذي يصل للمستخدم. بصمة شهادة upload key ليست بصمة App Signing المطلوبة في `assetlinks.json`.
 
-> Never use an action that exports a keystore or its passwords as a downloadable artifact. Preserving the key means preserving it in a secure owner-controlled vault, not exposing it in code or artifacts.
+## ترتيب النشر المباشر الصحيح
 
-## Required release gates
+1. في Play Console، افتح إصدار **Production** للحزمة `com.koleety.ai.app` واختر Play App Signing.
+2. ارفع ملف AAB الموقّع كمسودة إصدار إنتاجي. بعد قبول الحزمة، انسخ **SHA-256 الخاص بـ App signing key** من صفحة App signing، وليس بصمة upload key.
+3. حدّث `https://koleety.com/.well-known/assetlinks.json` و`https://www.koleety.com/.well-known/assetlinks.json` بإدخال الحزمة الجديدة والبصمة التي يعرضها Play Console، ثم انشر تحديث الموقع.
+4. راجع قائمة تغييرات الإنتاج وبيانات Data safety وتصنيف المحتوى وسياسة الخصوصية ومواد المتجر، ثم أرسل الإصدار للمراجعة فقط بعد اكتمال الخطوة السابقة.
+5. يبقى `com.mycollegeai.app` متاحاً ولا يُحذف أو يُوقف ضمن هذا المسار.
 
-1. Verify that `https://koleety.com/.well-known/assetlinks.json` contains only `com.koleety.ai` with the current Play App Signing fingerprint.
-2. Build a signed AAB with the preserved upload key.
-3. Upload the AAB to **Internal testing only**.
-4. Install from the tester link and confirm repeated cold starts, deep links, sign-in, image upload, and primary study flows on a physical Android device.
-5. Keep `com.mycollegeai.app` available until the new app completes physical-device validation and a separate owner decision authorizes any transition.
-6. Do not upload to production before the physical-device gate passes.
+> لا تُخمن بصمة App Signing ولا تستبدل Asset Links ببصمة upload key. افتح التطبيق الجديد حتى قبل التحقق الكامل من App Links سيبقى قادراً على فتح `https://koleety.com/` عبر المتصفح الموثوق، لكن تحقق App Links هو ما يضمن تجربة TWA الكاملة بلا شريط متصفح.
+
+## التحقق بعد وصول أول AAB إلى Play Console
+
+بعد ظهور بصمة Play App Signing ونشر `assetlinks.json`، افحص عبر رابط Google الرسمي للتحقق من Digital Asset Links، ثم نفّذ على هاتف Android حقيقي: بدء بارد مرتين، فتح رابط `koleety.com`، تسجيل الدخول، الوصول إلى أداة من الحساب، ورفع صورة غير حساسة. هذا تحقق جودة مُوصى به ولا ينشر أو يغير التطبيق القديم.
+
+## ممنوعات أمنية
+
+- لا ترفع ملف `.jks` أو كلمات المرور أو شهادة خاصة إلى GitHub أو Google Drive عام.
+- لا تستخدم workflow يصدّر keystore أو كلمة مرور كـ artifact قابل للتنزيل.
+- لا تغير اسم الحزمة أو شهادة upload key بعد ربط الإصدار الأول بـ Play App Signing.

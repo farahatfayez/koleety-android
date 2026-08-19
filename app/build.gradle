@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.koleety.ai'
+    namespace 'com.koleety.ai.app'
     compileSdk 36
 
     defaultConfig {
-        applicationId "com.koleety.ai"
+        applicationId "com.koleety.ai.app"
         minSdk 24
         targetSdk 36
         versionCode 21

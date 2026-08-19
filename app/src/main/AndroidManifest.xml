@@ -11,6 +11,11 @@
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- Camera supports optional lecture capture; it is not required to open the TWA. -->
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -87,7 +92,7 @@
 
             <meta-data
                 android:name="android.support.customtabs.trusted.FILE_PROVIDER_AUTHORITY"
-                android:value="com.koleety.ai.fileprovider" />
+                android:value="com.koleety.ai.app.fileprovider" />
 
             <meta-data
                 android:name="android.support.customtabs.trusted.HANDLES_INTERNAL_LINKS"
@@ -99,7 +104,8 @@
             android:name=".AITutorShortcut"
             android:targetActivity="com.google.androidbrowserhelper.trusted.LauncherActivity"
             android:exported="true">
-            <intent-filter>
+            <!-- The shortcut opens a verified Koleety URL in the same TWA. -->
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -113,7 +119,7 @@
         <!-- File Provider for camera/file upload -->
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="com.koleety.ai.fileprovider"
+            android:authorities="com.koleety.ai.app.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

@@ -5,7 +5,7 @@
 -keep class androidx.browser.** { *; }
 
 # Keep app classes
--keep class com.koleety.ai.** { *; }
+-keep class com.koleety.ai.app.** { *; }
 
 # Keep AndroidX
 -keep class androidx.** { *; }
