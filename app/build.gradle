@@ -9,10 +9,11 @@ android {
 
     defaultConfig {
         applicationId "com.koleety.ai.app"
-        minSdk 24
+        // Android 5.0 preserves broad device compatibility for this web-based TWA.
+        minSdk 21
         targetSdk 36
-        versionCode 21
-        versionName "1.0.20"
+        versionCode 22
+        versionName "1.0.21"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

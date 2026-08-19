@@ -8,8 +8,8 @@
 |---|---|
 | Application ID / namespace | `com.koleety.ai.app` |
 | الاسم الظاهر | KOLEETY AI |
-| الإصدار | `1.0.20` — `versionCode 21` |
-| compile / target SDK | 36 |
+| الإصدار | `1.0.21` — `versionCode 22` |
+| min / compile / target SDK | 21 / 36 / 36 |
 | عنوان TWA الافتراضي | `https://koleety.com/` |
 | نطاقات App Links | `koleety.com` و`www.koleety.com` |
 | Android Browser Helper | `2.5.0` — مثبت لتجنب تغيير سلوك الغلاف دون مرجع للتطبيق القديم |
@@ -18,6 +18,8 @@
 ## ما تم التحقق منه محلياً
 
 تم بناء ملف AAB موقّع محلياً باستخدام JDK 17 وAndroid SDK 36، ونجح Android Lint بعد تفعيل تحقق App Links لاختصار المساعد. ملف البناء محمي بـ ProGuard ويحتوي على توقيع upload key مستقل عن أي تطبيق سابق.
+
+اتخذت نسخة التوافق `1.0.21` حد Android 5.0 (`minSdk 21`) بدلاً من Android 7.0، مع الإبقاء على `targetSdk 36` المطلوب من Google Play. لا يغيّر هذا عنوان TWA أو طريقة التشغيل أو وظائف التطبيق؛ غايته إعادة إتاحة الأجهزة الأقدم التي لا تحتاج أي قدرات عتاد خاصة.
 
 ## سياسة المفاتيح والتوقيع
 
