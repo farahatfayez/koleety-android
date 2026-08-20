@@ -1,74 +1,45 @@
 plugins {
     id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
 }
 
+def koleetyHomeUrl = (project.findProperty('koleetyHomeUrl') ?: 'https://koleety.com/').toString()
+def koleetyTrustedHost = new URI(koleetyHomeUrl).host
+
 android {
+    // Keep source/resource package aligned with production; applicationId stays sandbox-only.
     namespace 'com.koleety.ai.app'
     compileSdk 36
 
-    defaultConfig {
-        applicationId "com.koleety.ai.app"
-        // Android 5.0 preserves broad device compatibility for this web-based TWA.
-        minSdk 21
-        targetSdk 36
-        versionCode 23
-        versionName "1.0.22"
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    buildFeatures {
+        buildConfig true
     }
 
-    signingConfigs {
-        release {
-            def keystorePath = System.getenv("KEYSTORE_PATH")
-            if (keystorePath) {
-                storeFile file(keystorePath)
-                storePassword System.getenv("KEYSTORE_PASSWORD")
-                keyAlias System.getenv("KEY_ALIAS")
-                keyPassword System.getenv("KEY_PASSWORD")
-            }
-        }
+    defaultConfig {
+        // Sandbox package so this APK cannot replace any app currently installed from Google Play.
+        applicationId 'com.koleety.ai.app.sandbox'
+        // Android 5.0+ keeps broad device compatibility while all used APIs remain supported.
+        minSdk 21
+        targetSdk 36
+        versionCode 1
+        versionName '0.1.0-sandbox'
+        buildConfigField 'String', 'KOLEETY_HOME_URL', "\"${koleetyHomeUrl}\""
+        buildConfigField 'String', 'KOLEETY_TRUSTED_HOST', "\"${koleetyTrustedHost}\""
     }
 
     buildTypes {
-        release {
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
-        }
         debug {
-            applicationIdSuffix ".debug"
-            versionNameSuffix "-debug"
+            applicationIdSuffix '.debug'
+            versionNameSuffix '-debug'
         }
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = '17'
-    }
-
-    buildFeatures {
-        viewBinding true
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
     }
 }
 
 dependencies {
-    // Trusted Web Activity (TWA) - Google's official library
-    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.5.0'
-
-    // AndroidX Core
-    implementation 'androidx.core:core-ktx:1.12.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.11.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-
-    // Splash Screen API (Android 12+)
-    implementation 'androidx.core:core-splashscreen:1.0.1'
-
-    // Browser (Chrome Custom Tabs fallback)
-    implementation 'androidx.browser:browser:1.7.0'
+    implementation 'androidx.activity:activity:1.10.1'
+    implementation 'androidx.core:core:1.15.0'
+    implementation 'androidx.webkit:webkit:1.12.1'
 }
