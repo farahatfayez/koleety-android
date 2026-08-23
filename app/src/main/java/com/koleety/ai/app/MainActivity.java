@@ -103,6 +103,9 @@ public class MainActivity extends ComponentActivity {
         settings.setAllowFileAccessFromFileURLs(false);
         settings.setAllowUniversalAccessFromFileURLs(false);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+        // TTS is requested after the student's tap; allow the resulting audio to start
+        // when it arrives instead of treating the asynchronous play call as autoplay.
+        settings.setMediaPlaybackRequiresUserGesture(false);
         settings.setSupportMultipleWindows(false);
         settings.setUserAgentString(settings.getUserAgentString() + " KOLEETYNative/0.1");
 
