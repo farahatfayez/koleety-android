@@ -56,6 +56,7 @@ import java.util.Locale;
  */
 public class MainActivity extends ComponentActivity {
     private static final int WEB_PERMISSION_REQUEST = 9104;
+    private static final int CAMERA_LAUNCH_PERMISSION_REQUEST = 9105;
     private static final String STATE_CAMERA_URI = "pending_camera_uri";
     private static final String STATE_FILE_CHOOSER_ACTIVE = "file_chooser_active";
 
@@ -71,6 +72,7 @@ public class MainActivity extends ComponentActivity {
         Uri pendingCameraUri;
         PermissionRequest pendingWebPermissionRequest;
         boolean fileChooserActive;
+        boolean cameraLaunchPending;
 
         void clearFileChooser() {
             pendingFileCallback = null;
@@ -180,13 +182,30 @@ public class MainActivity extends ComponentActivity {
     }
 
     private void launchCameraCapture() {
+        if (!hasPermission(Manifest.permission.CAMERA)) {
+            mediaRequests.cameraLaunchPending = true;
+            ActivityCompat.requestPermissions(
+                this,
+                new String[] { Manifest.permission.CAMERA },
+                CAMERA_LAUNCH_PERMISSION_REQUEST
+            );
+            return;
+        }
+        launchCameraCaptureWithPermission();
+    }
+
+    private void launchCameraCaptureWithPermission() {
         Uri outputUri = createCameraOutputUri();
         if (outputUri == null) {
             deliverFileResult(null, "تعذّر تجهيز الكاميرا. حاول مرة أخرى.");
             return;
         }
         mediaRequests.pendingCameraUri = outputUri;
-        cameraCaptureLauncher.launch(outputUri);
+        try {
+            cameraCaptureLauncher.launch(outputUri);
+        } catch (SecurityException | ActivityNotFoundException | IllegalArgumentException exception) {
+            deliverFileResult(null, "تعذّر فتح الكاميرا. تحقق من إذن الكاميرا ثم حاول مرة أخرى.");
+        }
     }
 
     private Uri createCameraOutputUri() {
@@ -282,6 +301,16 @@ public class MainActivity extends ComponentActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == CAMERA_LAUNCH_PERMISSION_REQUEST) {
+            boolean launchPending = mediaRequests.cameraLaunchPending;
+            mediaRequests.cameraLaunchPending = false;
+            if (launchPending && hasPermission(Manifest.permission.CAMERA)) {
+                launchCameraCaptureWithPermission();
+            } else if (launchPending) {
+                deliverFileResult(null, "يلزم السماح بإذن الكاميرا لالتقاط الصورة.");
+            }
+            return;
+        }
         if (requestCode != WEB_PERMISSION_REQUEST) return;
         PermissionRequest request = mediaRequests.pendingWebPermissionRequest;
         mediaRequests.pendingWebPermissionRequest = null;
