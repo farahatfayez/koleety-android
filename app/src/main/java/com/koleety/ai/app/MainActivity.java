@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.view.View;
 import android.webkit.SslErrorHandler;
@@ -26,6 +27,8 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 import androidx.activity.ComponentActivity;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 import androidx.core.content.ContextCompat;
@@ -37,6 +40,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -47,7 +51,6 @@ import android.webkit.MimeTypeMap;
  * JavaScript bridge. Only trusted HTTPS pages are kept in the embedded WebView.
  */
 public class MainActivity extends ComponentActivity {
-    private static final int FILE_CHOOSER_REQUEST = 9103;
     private static final int WEB_PERMISSION_REQUEST = 9104;
     private static final String STATE_PENDING_CAMERA_URI = "pending_camera_uri";
     private static final String STATE_FILE_CHOOSER_ACTIVE = "file_chooser_active";
@@ -56,6 +59,7 @@ public class MainActivity extends ComponentActivity {
     private LinearLayout loadingPanel;
     private LinearLayout errorPanel;
     private MediaRequestViewModel mediaRequests;
+    private ActivityResultLauncher<Intent> fileChooserLauncher;
 
     /**
      * The system camera, file picker, and runtime-permission dialogs may recreate an
@@ -84,6 +88,10 @@ public class MainActivity extends ComponentActivity {
         loadingPanel = findViewById(com.koleety.ai.app.R.id.loading_panel);
         errorPanel = findViewById(com.koleety.ai.app.R.id.error_panel);
         mediaRequests = new ViewModelProvider(this).get(MediaRequestViewModel.class);
+        fileChooserLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> deliverFileChooserResult(result.getResultCode(), result.getData())
+        );
         Button retryButton = findViewById(com.koleety.ai.app.R.id.retry_button);
         retryButton.setOnClickListener(v -> reloadHome());
 
@@ -177,10 +185,8 @@ public class MainActivity extends ComponentActivity {
             || savedInstanceState.getBoolean(STATE_FILE_CHOOSER_ACTIVE, false);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode != FILE_CHOOSER_REQUEST || mediaRequests.pendingFileCallback == null) return;
+    private void deliverFileChooserResult(int resultCode, Intent data) {
+        if (mediaRequests.pendingFileCallback == null) return;
         Uri[] result = null;
         if (resultCode == Activity.RESULT_OK && hasCapturedCameraImage()) {
             // Camera implementations sometimes return an empty Intent and sometimes a non-null
@@ -188,7 +194,8 @@ public class MainActivity extends ComponentActivity {
             // source in both cases, but only after confirming that it contains image bytes.
             result = new Uri[] { mediaRequests.pendingCameraUri };
         } else if (resultCode == Activity.RESULT_OK) {
-            result = copySelectedUrisToAppCache(data);
+            Uri thumbnailUri = saveCameraThumbnail(data);
+            result = thumbnailUri == null ? copySelectedUrisToAppCache(data) : new Uri[] { thumbnailUri };
         }
         if (result == null || result.length == 0) {
             Toast.makeText(this, "تعذّر تسليم الملف للتطبيق. حاول اختيار صورة أو ملف آخر.", Toast.LENGTH_LONG).show();
@@ -201,10 +208,30 @@ public class MainActivity extends ComponentActivity {
     private boolean hasCapturedCameraImage() {
         Uri capturedUri = mediaRequests.pendingCameraUri;
         if (capturedUri == null) return false;
-        try (InputStream input = getContentResolver().openInputStream(capturedUri)) {
-            return input != null && input.read() != -1;
-        } catch (IOException ignored) {
-            return false;
+        // Some camera apps signal RESULT_OK just before their final flush. Retry briefly
+        // instead of treating a valid photo as a lost result and returning to the WebView empty.
+        for (int attempt = 0; attempt < 4; attempt++) {
+            try (InputStream input = getContentResolver().openInputStream(capturedUri)) {
+                if (input != null && input.read() != -1) return true;
+            } catch (IOException ignored) {
+                // Try the next short read before declaring the capture unavailable.
+            }
+            SystemClock.sleep(150);
+        }
+        return false;
+    }
+
+    private Uri saveCameraThumbnail(Intent data) {
+        if (mediaRequests.pendingCameraUri == null || data == null || data.getExtras() == null) return null;
+        Object candidate = data.getExtras().get("data");
+        if (!(candidate instanceof Bitmap)) return null;
+        try (OutputStream output = getContentResolver().openOutputStream(mediaRequests.pendingCameraUri)) {
+            Bitmap thumbnail = (Bitmap) candidate;
+            return output != null && thumbnail.compress(Bitmap.CompressFormat.JPEG, 92, output)
+                ? mediaRequests.pendingCameraUri
+                : null;
+        } catch (IOException | SecurityException ignored) {
+            return null;
         }
     }
 
@@ -377,7 +404,7 @@ public class MainActivity extends ComponentActivity {
             mediaRequests.fileChooserActive = true;
             try {
                 Intent intent = createFileChooserIntent(fileChooserParams);
-                startActivityForResult(intent, FILE_CHOOSER_REQUEST);
+                fileChooserLauncher.launch(intent);
                 return true;
             } catch (ActivityNotFoundException | IllegalArgumentException exception) {
                 mediaRequests.pendingFileCallback.onReceiveValue(null);
