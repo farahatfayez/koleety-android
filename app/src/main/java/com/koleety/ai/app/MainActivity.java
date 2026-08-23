@@ -33,6 +33,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.webkit.WebSettingsCompat;
 import androidx.webkit.WebViewFeature;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -174,14 +176,26 @@ public class MainActivity extends ComponentActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode != FILE_CHOOSER_REQUEST || mediaRequests.pendingFileCallback == null) return;
         Uri[] result = null;
-        if (resultCode == Activity.RESULT_OK && data == null && mediaRequests.pendingCameraUri != null) {
-            // ACTION_IMAGE_CAPTURE writes to the FileProvider URI and often returns no data Intent.
+        if (resultCode == Activity.RESULT_OK && hasCapturedCameraImage()) {
+            // Camera implementations sometimes return an empty Intent and sometimes a non-null
+            // Intent after writing to EXTRA_OUTPUT. The FileProvider URI is the only reliable
+            // source in both cases, but only after confirming that it contains image bytes.
             result = new Uri[] { mediaRequests.pendingCameraUri };
         } else {
             result = WebChromeClient.FileChooserParams.parseResult(resultCode, data);
         }
         mediaRequests.pendingFileCallback.onReceiveValue(result);
         mediaRequests.clearFileChooser();
+    }
+
+    private boolean hasCapturedCameraImage() {
+        Uri capturedUri = mediaRequests.pendingCameraUri;
+        if (capturedUri == null) return false;
+        try (InputStream input = getContentResolver().openInputStream(capturedUri)) {
+            return input != null && input.read() != -1;
+        } catch (IOException ignored) {
+            return false;
+        }
     }
 
     @Override
@@ -317,7 +331,9 @@ public class MainActivity extends ComponentActivity {
             if (!acceptsImages(params) && !params.isCaptureEnabled()) return picker;
 
             Intent capture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            File directory = new File(getExternalCacheDir(), "lecture-captures");
+            // Internal cache keeps the capture available to the WebView via FileProvider
+            // without requiring broad media or storage permissions.
+            File directory = new File(getCacheDir(), "lecture-captures");
             if (!directory.exists() && !directory.mkdirs()) return picker;
             File output = new File(directory, "lecture-" + System.currentTimeMillis() + ".jpg");
             mediaRequests.pendingCameraUri = FileProvider.getUriForFile(
