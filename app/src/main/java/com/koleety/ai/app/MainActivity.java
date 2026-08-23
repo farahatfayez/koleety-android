@@ -24,6 +24,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 import androidx.activity.ComponentActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
@@ -33,11 +34,13 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.webkit.WebSettingsCompat;
 import androidx.webkit.WebViewFeature;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import android.webkit.MimeTypeMap;
 
 /**
  * Native KOLEETY shell. It intentionally has no TWA, Chrome Custom Tabs, or
@@ -184,8 +187,12 @@ public class MainActivity extends ComponentActivity {
             // Intent after writing to EXTRA_OUTPUT. The FileProvider URI is the only reliable
             // source in both cases, but only after confirming that it contains image bytes.
             result = new Uri[] { mediaRequests.pendingCameraUri };
-        } else {
-            result = WebChromeClient.FileChooserParams.parseResult(resultCode, data);
+        } else if (resultCode == Activity.RESULT_OK) {
+            result = copySelectedUrisToAppCache(data);
+        }
+        if (result == null || result.length == 0) {
+            Toast.makeText(this, "تعذّر تسليم الملف للتطبيق. حاول اختيار صورة أو ملف آخر.", Toast.LENGTH_LONG).show();
+            result = null;
         }
         mediaRequests.pendingFileCallback.onReceiveValue(result);
         mediaRequests.clearFileChooser();
@@ -198,6 +205,56 @@ public class MainActivity extends ComponentActivity {
             return input != null && input.read() != -1;
         } catch (IOException ignored) {
             return false;
+        }
+    }
+
+    /**
+     * Gallery and document providers issue temporary URI grants. Copy selected files into
+     * app-owned cache storage before handing them to the WebView file input, so that the
+     * renderer cannot lose access after the picker closes. This handles multi-select too.
+     */
+    private Uri[] copySelectedUrisToAppCache(Intent data) {
+        if (data == null) return null;
+        List<Uri> selectedUris = new ArrayList<>();
+        ClipData clipData = data.getClipData();
+        if (clipData != null) {
+            for (int index = 0; index < clipData.getItemCount(); index++) {
+                Uri copied = copyUriToAppCache(clipData.getItemAt(index).getUri());
+                if (copied != null) selectedUris.add(copied);
+            }
+        } else if (data.getData() != null) {
+            Uri copied = copyUriToAppCache(data.getData());
+            if (copied != null) selectedUris.add(copied);
+        }
+        return selectedUris.isEmpty() ? null : selectedUris.toArray(new Uri[0]);
+    }
+
+    private Uri copyUriToAppCache(Uri source) {
+        if (source == null) return null;
+        String mimeType = getContentResolver().getType(source);
+        String extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
+        if (extension == null || extension.trim().isEmpty()) extension = "bin";
+        File directory = new File(getCacheDir(), "lecture-imports");
+        if (!directory.exists() && !directory.mkdirs()) return null;
+        File destination = new File(directory, "upload-" + System.currentTimeMillis() + "-" + Math.random() + "." + extension);
+
+        try (InputStream input = getContentResolver().openInputStream(source);
+             FileOutputStream output = new FileOutputStream(destination)) {
+            if (input == null) return null;
+            byte[] buffer = new byte[16 * 1024];
+            int bytesRead;
+            while ((bytesRead = input.read(buffer)) != -1) {
+                output.write(buffer, 0, bytesRead);
+            }
+            output.flush();
+            if (destination.length() == 0L) {
+                destination.delete();
+                return null;
+            }
+            return FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", destination);
+        } catch (IOException | SecurityException exception) {
+            if (destination.exists()) destination.delete();
+            return null;
         }
     }
 
@@ -331,7 +388,8 @@ public class MainActivity extends ComponentActivity {
 
         private Intent createFileChooserIntent(FileChooserParams params) {
             Intent picker = params.createIntent();
-            if (!acceptsImages(params) && !params.isCaptureEnabled()) return picker;
+            picker.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            if (!params.isCaptureEnabled()) return picker;
 
             Intent capture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             // Internal cache keeps the capture available to the WebView via FileProvider
@@ -347,17 +405,7 @@ public class MainActivity extends ComponentActivity {
             capture.putExtra(MediaStore.EXTRA_OUTPUT, mediaRequests.pendingCameraUri);
             capture.setClipData(ClipData.newRawUri("captured_lecture_image", mediaRequests.pendingCameraUri));
             capture.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-            Intent chooser = Intent.createChooser(picker, "اختر صورة المحاضرة");
-            chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] { capture });
-            return chooser;
-        }
-
-        private boolean acceptsImages(FileChooserParams params) {
-            for (String type : params.getAcceptTypes()) {
-                if (type != null && (type.startsWith("image/") || type.equals("*/*"))) return true;
-            }
-            return false;
+            return capture;
         }
     }
 }
