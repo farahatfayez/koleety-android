@@ -9,10 +9,13 @@ import android.database.Cursor;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.media.AudioAttributes;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.view.View;
 import android.webkit.PermissionRequest;
 import android.webkit.SslErrorHandler;
@@ -76,6 +79,8 @@ public class MainActivity extends ComponentActivity {
     private MediaRecorder nativeAudioRecorder;
     private File nativeAudioFile;
     private boolean nativeAudioStartPending;
+    private TextToSpeech nativeTts;
+    private boolean nativeTtsReady;
 
     public static final class MediaRequestViewModel extends ViewModel {
         ValueCallback<Uri[]> pendingFileCallback;
@@ -105,6 +110,7 @@ public class MainActivity extends ComponentActivity {
         Button retryButton = findViewById(R.id.retry_button);
         retryButton.setOnClickListener(view -> reloadHome());
         configureWebView();
+        initializeNativeTts();
 
         if (savedInstanceState == null) {
             reloadHome();
@@ -147,6 +153,45 @@ public class MainActivity extends ComponentActivity {
         webView.setWebViewClient(new TrustedWebViewClient());
         webView.setWebChromeClient(new KoleetyChromeClient());
         webView.addJavascriptInterface(new KoleetyNativeAudioBridge(), "KoleetyNativeAudio");
+        webView.addJavascriptInterface(new KoleetyNativeTtsBridge(), "KoleetyNativeTTS");
+    }
+
+    private void initializeNativeTts() {
+        nativeTts = new TextToSpeech(getApplicationContext(), status -> {
+            nativeTtsReady = status == TextToSpeech.SUCCESS;
+            if (!nativeTtsReady) return;
+            nativeTts.setAudioAttributes(new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                .build());
+            nativeTts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                @Override public void onStart(String utteranceId) { dispatchNativeTtsState("started"); }
+                @Override public void onDone(String utteranceId) { dispatchNativeTtsState("ended"); }
+                @Override public void onError(String utteranceId) { dispatchNativeTtsState("error"); }
+            });
+        });
+    }
+
+    private void dispatchNativeTtsState(String state) {
+        if (webView == null) return;
+        webView.post(() -> webView.evaluateJavascript(
+            "window.dispatchEvent(new CustomEvent('koleety-native-tts',{detail:{state:'" + state + "'}}));",
+            null
+        ));
+    }
+
+    private void speakWithNativeTts(String text, String languageTag) {
+        if (!nativeTtsReady || nativeTts == null || text == null || text.trim().isEmpty()) {
+            dispatchNativeTtsState("error");
+            return;
+        }
+        Locale locale = Locale.forLanguageTag(languageTag == null ? "ar-EG" : languageTag);
+        int languageResult = nativeTts.setLanguage(locale);
+        if (languageResult == TextToSpeech.LANG_MISSING_DATA || languageResult == TextToSpeech.LANG_NOT_SUPPORTED) {
+            nativeTts.setLanguage(Locale.US);
+        }
+        int result = nativeTts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "koleety-tts");
+        if (result == TextToSpeech.ERROR) dispatchNativeTtsState("error");
     }
 
     private void reloadHome() {
@@ -490,6 +535,29 @@ public class MainActivity extends ComponentActivity {
         @JavascriptInterface public boolean isAvailable() { return true; }
         @JavascriptInterface public void start() { runOnUiThread(MainActivity.this::launchNativeAudioRecording); }
         @JavascriptInterface public void stop() { runOnUiThread(() -> stopNativeAudioRecording(true)); }
+    }
+
+    private final class KoleetyNativeTtsBridge {
+        @JavascriptInterface public boolean isAvailable() { return nativeTtsReady; }
+        @JavascriptInterface public void speak(String text, String languageTag) {
+            runOnUiThread(() -> speakWithNativeTts(text, languageTag));
+        }
+        @JavascriptInterface public void stop() {
+            runOnUiThread(() -> {
+                if (nativeTts != null) nativeTts.stop();
+                dispatchNativeTtsState("ended");
+            });
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (nativeTts != null) {
+            nativeTts.stop();
+            nativeTts.shutdown();
+            nativeTts = null;
+        }
+        super.onDestroy();
     }
 
     private final class TrustedWebViewClient extends WebViewClient {
