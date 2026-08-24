@@ -12,7 +12,6 @@ import android.graphics.Bitmap;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.provider.OpenableColumns;
 import android.view.View;
 import android.webkit.PermissionRequest;
@@ -63,6 +62,8 @@ public class MainActivity extends ComponentActivity {
     private static final int WEB_PERMISSION_REQUEST = 9104;
     private static final int CAMERA_LAUNCH_PERMISSION_REQUEST = 9105;
     private static final int NATIVE_AUDIO_PERMISSION_REQUEST = 9106;
+    private static final int CAMERA_CAPTURE_READY_MAX_ATTEMPTS = 20;
+    private static final long CAMERA_CAPTURE_READY_RETRY_MS = 150L;
     private static final String STATE_CAMERA_URI = "pending_camera_uri";
     private static final String STATE_FILE_CHOOSER_ACTIVE = "file_chooser_active";
 
@@ -230,24 +231,40 @@ public class MainActivity extends ComponentActivity {
     }
 
     private void deliverCameraCaptureResult(Boolean captureSucceeded) {
-        Uri[] result = Boolean.TRUE.equals(captureSucceeded) && hasCapturedCameraImage()
-            ? new Uri[] { mediaRequests.pendingCameraUri }
-            : null;
-        deliverFileResult(result, result == null ? "لم تصل صورة من الكاميرا. تحقق من الإذن وحاول مرة أخرى." : null);
+        if (!Boolean.TRUE.equals(captureSucceeded)) {
+            deliverFileResult(null, "لم تصل صورة من الكاميرا. تحقق من الإذن وحاول مرة أخرى.");
+            return;
+        }
+        deliverCameraCaptureWhenReady(0);
+    }
+
+    private void deliverCameraCaptureWhenReady(int attempt) {
+        if (hasCapturedCameraImage()) {
+            deliverFileResult(new Uri[] { mediaRequests.pendingCameraUri }, null);
+            return;
+        }
+        if (attempt + 1 < CAMERA_CAPTURE_READY_MAX_ATTEMPTS) {
+            // Do not sleep on the UI thread: some camera apps finish writing after
+            // their Activity result returns, and blocking this thread can interrupt
+            // the WebView callback that must receive the chosen URI.
+            webView.postDelayed(
+                () -> deliverCameraCaptureWhenReady(attempt + 1),
+                CAMERA_CAPTURE_READY_RETRY_MS
+            );
+            return;
+        }
+        deliverFileResult(null, "التقطت الكاميرا الصورة لكن لم تكتمل كتابتها. حاول مرة أخرى.");
     }
 
     private boolean hasCapturedCameraImage() {
         Uri uri = mediaRequests.pendingCameraUri;
         if (uri == null) return false;
-        for (int attempt = 0; attempt < 5; attempt++) {
-            try (InputStream input = getContentResolver().openInputStream(uri)) {
-                if (input != null && input.read() != -1) return true;
-            } catch (IOException ignored) {
-                // The camera can report success before the final bytes are flushed.
-            }
-            SystemClock.sleep(150);
+        try (InputStream input = getContentResolver().openInputStream(uri)) {
+            return input != null && input.read() != -1;
+        } catch (IOException ignored) {
+            // The camera can report success before the final bytes are flushed.
+            return false;
         }
-        return false;
     }
 
     private void launchFilePicker(WebChromeClient.FileChooserParams params) {
