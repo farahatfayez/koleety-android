@@ -1,5 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="koleety_navy">#071B33</color>
-    <color name="koleety_gold">#E7B84B</color>
-    <color name="koleety_surface">#F8FAFC</color>
+    <color name="koleety_background">#143D85</color>
 </resources>

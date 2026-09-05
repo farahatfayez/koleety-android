@@ -4,5 +4,6 @@
         <item name="android:windowActionModeOverlay">true</item>
         <item name="android:statusBarColor">@color/koleety_background</item>
         <item name="android:navigationBarColor">@color/koleety_background</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 </resources>

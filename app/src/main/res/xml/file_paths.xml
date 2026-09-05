@@ -1,4 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
-    <cache-path name="lecture_captures" path="lecture-captures/" />
-    <cache-path name="lecture_imports" path="lecture-imports/" />
+    <cache-path name="lecture-captures" path="lecture-captures/" />
+    <cache-path name="lecture-imports" path="lecture-imports/" />
+    <cache-path name="lecture-audio" path="lecture-audio/" />
 </paths>

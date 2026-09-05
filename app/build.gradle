@@ -4,9 +4,14 @@ plugins {
 
 def koleetyHomeUrl = (project.findProperty('koleetyHomeUrl') ?: 'https://koleety.com/').toString()
 def koleetyTrustedHost = new URI(koleetyHomeUrl).host
+def releaseKeystorePath = System.getenv('KEYSTORE_PATH')
+def releaseKeystorePassword = System.getenv('KEYSTORE_PASSWORD')
+def releaseKeyAlias = System.getenv('KEY_ALIAS')
+def releaseKeyPassword = System.getenv('KEY_PASSWORD')
 
 android {
-    // Keep source/resource package aligned with production; applicationId stays sandbox-only.
+    // Production source package. The sandbox uses a debug suffix only, so release
+    // remains the approved Google Play identity.
     namespace 'com.koleety.ai.app'
     compileSdk 36
 
@@ -15,26 +20,50 @@ android {
     }
 
     defaultConfig {
-        // Sandbox package so this APK cannot replace any app currently installed from Google Play.
-        applicationId 'com.koleety.ai.app.sandbox'
+        applicationId 'com.koleety.ai.app'
         // Android 5.0+ keeps broad device compatibility while all used APIs remain supported.
         minSdk 21
         targetSdk 36
-        versionCode 1
-        versionName '0.1.0-sandbox'
+        // Confirm the next permitted code in Play Console before any upload.
+        versionCode 24
+        versionName '1.0.24'
         buildConfigField 'String', 'KOLEETY_HOME_URL', "\"${koleetyHomeUrl}\""
         buildConfigField 'String', 'KOLEETY_TRUSTED_HOST', "\"${koleetyTrustedHost}\""
     }
 
+    signingConfigs {
+        release {
+            if (releaseKeystorePath) {
+                storeFile file(releaseKeystorePath)
+                storePassword releaseKeystorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
+        }
+    }
+
     buildTypes {
         debug {
-            applicationIdSuffix '.debug'
-            versionNameSuffix '-debug'
+            applicationIdSuffix '.sandbox.debug'
+            versionNameSuffix '-sandbox-debug'
         }
         release {
             minifyEnabled false
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+gradle.taskGraph.whenReady { graph ->
+    def needsReleaseSigning = graph.allTasks.any { it.name.toLowerCase().contains('release') }
+    if (needsReleaseSigning && (!releaseKeystorePath || !releaseKeystorePassword || !releaseKeyAlias || !releaseKeyPassword)) {
+        throw new GradleException('Release signing is required. Supply KEYSTORE_PATH, KEYSTORE_PASSWORD, KEY_ALIAS, and KEY_PASSWORD through secure environment variables.')
     }
 }
 

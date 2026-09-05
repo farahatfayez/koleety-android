@@ -472,7 +472,10 @@ public class MainActivity extends ComponentActivity {
         try {
             nativeAudioFile = File.createTempFile("lecture-", ".m4a", directory);
             nativeAudioRecorder = new MediaRecorder();
-            nativeAudioRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            // Voice recognition uses the device speech-processing path (including
+            // noise suppression where available) and is better suited to STT than
+            // the generic microphone source.
+            nativeAudioRecorder.setAudioSource(MediaRecorder.AudioSource.VOICE_RECOGNITION);
             nativeAudioRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
             nativeAudioRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
             nativeAudioRecorder.setAudioEncodingBitRate(128000);
@@ -552,6 +555,10 @@ public class MainActivity extends ComponentActivity {
 
     @Override
     protected void onDestroy() {
+        // Never retain the microphone if Android destroys the WebView while a
+        // recording is active; this also prevents other recorder apps from
+        // seeing KOLEETY as a background audio owner.
+        stopNativeAudioRecording(false);
         if (nativeTts != null) {
             nativeTts.stop();
             nativeTts.shutdown();

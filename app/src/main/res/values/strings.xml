@@ -1,7 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">KOLEETY AI اختبار</string>
-    <string name="loading_message">يتم فتح منصة كليتي…</string>
-    <string name="offline_title">تعذّر فتح المنصة</string>
-    <string name="offline_message">تحقق من اتصال الإنترنت ثم أعد المحاولة.</string>
+    <string name="loading_platform">يتم فتح منصة كليتي…</string>
+    <string name="loading_error">تعذر فتح المنصة. تحقق من اتصال الإنترنت ثم حاول مرة أخرى.</string>
     <string name="retry">إعادة المحاولة</string>
 </resources>
