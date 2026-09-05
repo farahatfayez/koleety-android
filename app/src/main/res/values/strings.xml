@@ -4,4 +4,10 @@
     <string name="loading_platform">يتم فتح منصة كليتي…</string>
     <string name="loading_error">تعذر فتح المنصة. تحقق من اتصال الإنترنت ثم حاول مرة أخرى.</string>
     <string name="retry">إعادة المحاولة</string>
+    <string name="shortcut_ai_tutor">المدرس الذكي</string>
+    <string name="shortcut_ai_tutor_desc">افتح المدرس الذكي في KOLEETY AI</string>
+    <string name="shortcut_lecture">شرح المحاضرات</string>
+    <string name="shortcut_lecture_desc">صوّر أو ارفع مادة واشرحها باستخدام الذكاء الاصطناعي</string>
+    <string name="shortcut_quiz">اختبارات ذكية</string>
+    <string name="shortcut_quiz_desc">أنشئ اختباراً طبياً تفاعلياً</string>
 </resources>
