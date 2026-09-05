@@ -64,7 +64,7 @@ jobs:
       - name: Build signed release AAB for internal testing
         if: inputs.build_type == 'release'
         env:
-          KEYSTORE_PATH: app/keystore/koleety.keystore
+          KEYSTORE_PATH: keystore/koleety.keystore
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
