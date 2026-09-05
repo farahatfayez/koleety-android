@@ -1,15 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- KOLEETY AI Brand Colors -->
-    <color name="colorPrimary">#0a1628</color>
-    <color name="colorPrimaryDark">#060e1a</color>
-    <color name="colorAccent">#00d4ff</color>
-    <color name="colorBackground">#0a1628</color>
-    <color name="colorSurface">#0d2137</color>
-    <color name="colorOnPrimary">#ffffff</color>
-    <color name="colorSecondary">#00d4ff</color>
-    <color name="colorSecondaryVariant">#4dd9ff</color>
-    <!-- Splash screen -->
-    <color name="splashBackground">#0a1628</color>
-    <color name="windowBackground">#0a1628</color>
+    <color name="koleety_background">#143D85</color>
 </resources>

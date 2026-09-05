@@ -1,58 +1,74 @@
 plugins {
     id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
 }
+
+def koleetyHomeUrl = (project.findProperty('koleetyHomeUrl') ?: 'https://koleety.com/').toString()
+def koleetyTrustedHost = new URI(koleetyHomeUrl).host
+def releaseKeystorePath = System.getenv('KEYSTORE_PATH')
+def releaseKeystorePassword = System.getenv('KEYSTORE_PASSWORD')
+def releaseKeyAlias = System.getenv('KEY_ALIAS')
+def releaseKeyPassword = System.getenv('KEY_PASSWORD')
+
 android {
-    namespace 'com.koleety.ai'
+    // Production source package. The sandbox uses a debug suffix only, so release
+    // remains the approved Google Play identity.
+    namespace 'com.koleety.ai.app'
     compileSdk 36
-    defaultConfig {
-        applicationId "com.koleety.ai"
-        minSdk 24
-        targetSdk 36
-        versionCode 20
-        versionName "1.0.19"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+    buildFeatures {
+        buildConfig true
     }
+
+    defaultConfig {
+        applicationId 'com.koleety.ai.app'
+        // Android 5.0+ keeps broad device compatibility while all used APIs remain supported.
+        minSdk 21
+        targetSdk 36
+        // Confirm the next permitted code in Play Console before any upload.
+        versionCode 24
+        versionName '1.0.24'
+        buildConfigField 'String', 'KOLEETY_HOME_URL', "\"${koleetyHomeUrl}\""
+        buildConfigField 'String', 'KOLEETY_TRUSTED_HOST', "\"${koleetyTrustedHost}\""
+    }
+
     signingConfigs {
         release {
-            storeFile file(System.getenv("KEYSTORE_PATH") ?: "keystore/koleety.keystore")
-            storePassword System.getenv("KEYSTORE_PASSWORD") ?: "koleety2024"
-            keyAlias System.getenv("KEY_ALIAS") ?: "koleety"
-            keyPassword System.getenv("KEY_PASSWORD") ?: "koleety2024"
+            if (releaseKeystorePath) {
+                storeFile file(releaseKeystorePath)
+                storePassword releaseKeystorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
         }
     }
+
     buildTypes {
-        release {
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
-        }
         debug {
-            applicationIdSuffix ".debug"
-            versionNameSuffix "-debug"
+            applicationIdSuffix '.sandbox.debug'
+            versionNameSuffix '-sandbox-debug'
+        }
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = '17'
-    }
-    buildFeatures {
-        viewBinding true
+}
+
+gradle.taskGraph.whenReady { graph ->
+    def needsReleaseSigning = graph.allTasks.any { it.name.toLowerCase().contains('release') }
+    if (needsReleaseSigning && (!releaseKeystorePath || !releaseKeystorePassword || !releaseKeyAlias || !releaseKeyPassword)) {
+        throw new GradleException('Release signing is required. Supply KEYSTORE_PATH, KEYSTORE_PASSWORD, KEY_ALIAS, and KEY_PASSWORD through secure environment variables.')
     }
 }
+
 dependencies {
-    // Current TWA implementation compatible with compileSdk/targetSdk 36.
-    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.7.2'
-    implementation 'androidx.core:core-splashscreen:1.0.1'
-    implementation 'androidx.appcompat:appcompat:1.7.0'
-    implementation 'com.google.android.material:material:1.12.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'androidx.activity:activity-ktx:1.9.0'
-    implementation 'androidx.webkit:webkit:1.11.0'
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+    implementation 'androidx.activity:activity:1.10.1'
+    implementation 'androidx.core:core:1.15.0'
+    implementation 'androidx.webkit:webkit:1.12.1'
 }
