@@ -67,6 +67,9 @@ public class MainActivity extends ComponentActivity {
     private static final int NATIVE_AUDIO_PERMISSION_REQUEST = 9106;
     private static final int CAMERA_CAPTURE_READY_MAX_ATTEMPTS = 20;
     private static final long CAMERA_CAPTURE_READY_RETRY_MS = 150L;
+    // Keep the native JavaScript bridge comfortably below the server upload cap.
+    // This avoids allocating an unbounded byte array for a very long recording.
+    private static final long NATIVE_AUDIO_MAX_BYTES = 12L * 1024L * 1024L;
     private static final String STATE_CAMERA_URI = "pending_camera_uri";
     private static final String STATE_FILE_CHOOSER_ACTIVE = "file_chooser_active";
 
@@ -504,6 +507,12 @@ public class MainActivity extends ComponentActivity {
         }
         if (!sendToWeb || nativeAudioFile == null || nativeAudioFile.length() == 0L) {
             if (sendToWeb) dispatchNativeAudioError("لم يُسجَّل صوت صالح. حاول التسجيل لثانيتين على الأقل.");
+            deleteNativeAudioFile();
+            return;
+        }
+        if (nativeAudioFile.length() > NATIVE_AUDIO_MAX_BYTES || nativeAudioFile.length() > Integer.MAX_VALUE) {
+            deleteNativeAudioFile();
+            dispatchNativeAudioError("التسجيل طويل جداً للتحويل. سجّل مقطعاً أقصر ثم حاول مرة أخرى.");
             return;
         }
         try (InputStream input = new java.io.FileInputStream(nativeAudioFile)) {
@@ -523,7 +532,14 @@ public class MainActivity extends ComponentActivity {
             );
         } catch (IOException error) {
             dispatchNativeAudioError("تعذّر تسليم التسجيل إلى المحاضرة.");
+        } finally {
+            deleteNativeAudioFile();
         }
+    }
+
+    private void deleteNativeAudioFile() {
+        if (nativeAudioFile != null && nativeAudioFile.exists()) nativeAudioFile.delete();
+        nativeAudioFile = null;
     }
 
     private void dispatchNativeAudioError(String message) {
