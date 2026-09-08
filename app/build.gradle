@@ -24,9 +24,9 @@ android {
         // Android 5.0+ keeps broad device compatibility while all used APIs remain supported.
         minSdk 21
         targetSdk 36
-        // Confirm the next permitted code in Play Console before any upload.
-        versionCode 24
-        versionName '1.0.24'
+        // New signed upload artifact; keeps the code higher than the prior rejected artifact.
+        versionCode 25
+        versionName '1.0.25'
         buildConfigField 'String', 'KOLEETY_HOME_URL', "\"${koleetyHomeUrl}\""
         buildConfigField 'String', 'KOLEETY_TRUSTED_HOST', "\"${koleetyTrustedHost}\""
     }
