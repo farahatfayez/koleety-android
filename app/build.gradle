@@ -36,9 +36,9 @@ android {
         // Android 5.0+ keeps broad device compatibility while all used APIs remain supported.
         minSdk 21
         targetSdk 36
-        // Compatibility-corrected signed upload artifact; must exceed the uploaded version 25.
-        versionCode 26
-        versionName '1.0.26'
+        // Identity-only update; must exceed the published compatibility-corrected artifact.
+        versionCode 27
+        versionName '1.0.27'
         buildConfigField 'String', 'KOLEETY_HOME_URL', "\"${koleetyHomeUrl}\""
         buildConfigField 'String', 'KOLEETY_TRUSTED_HOST', "\"${koleetyTrustedHost}\""
     }

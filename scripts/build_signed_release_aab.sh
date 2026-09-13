@@ -28,7 +28,7 @@ cd "$ROOT_DIR"
 ./gradlew clean bundleRelease --stacktrace
 
 readonly SOURCE_AAB="app/build/outputs/bundle/release/app-release.aab"
-readonly TARGET_AAB="$ARTIFACT_DIR/koleety-ai-app-1.0.25-release.aab"
+readonly TARGET_AAB="$ARTIFACT_DIR/koleety-ai-app-1.0.27-identity-release.aab"
 test -s "$SOURCE_AAB"
 cp "$SOURCE_AAB" "$TARGET_AAB"
 sha256sum "$TARGET_AAB" > "$TARGET_AAB.sha256"
